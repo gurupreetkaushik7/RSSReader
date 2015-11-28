@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">RSSReader</string>
+    <string name="action_settings">Settings</string>
+    <string name="browsing_activity_str">Browsing Activity</string>
+    <string name="tb_rss_source">RSS source</string>
+    <string name="apply_rss">Apply</string>
+</resources>
