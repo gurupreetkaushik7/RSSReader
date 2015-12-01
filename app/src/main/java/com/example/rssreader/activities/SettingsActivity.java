@@ -1,7 +1,9 @@
-package com.example.rssreader;
+package com.example.rssreader.activities;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+
+import com.example.rssreader.R;
 
 public class SettingsActivity extends AppCompatActivity {
 
