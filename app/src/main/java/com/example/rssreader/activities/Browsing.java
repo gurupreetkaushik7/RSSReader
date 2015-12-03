@@ -2,6 +2,7 @@ package com.example.rssreader.activities;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -16,36 +17,31 @@ import android.widget.ListView;
 
 import com.example.rssreader.ListListener;
 import com.example.rssreader.R;
+import com.example.rssreader.data.SharedPreferencesHandler;
 import com.example.rssreader.model.RssItem;
 import com.example.rssreader.model.RssReader;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Browsing extends AppCompatActivity {
-
-    // A reference to the local object
     private Browsing localActivity;
+    private SharedPreferencesHandler prefHandler;
 
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_browsing);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        prefHandler = new SharedPreferencesHandler(this);
 
-        localActivity = this; // setting reference to this activity
+        localActivity = this; // set reference to this activity
 
-        ConnectivityManager connMgr = (ConnectivityManager)
-                getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-        if (networkInfo != null && networkInfo.isConnected()) {  // checking Internet connection
+        if (isOnline()) {
             GetRssDataTask rssReadingTask = new GetRssDataTask();
-            rssReadingTask.execute("http://ria.ru/export/rss2/economy/index.xml");
-        } else {
-            // no inet connection
+            String rssUrl = prefHandler.loadRssUrlFromPrefs();
+            rssReadingTask.execute(rssUrl);
         }
-
-
     }
 
     @Override
@@ -67,6 +63,13 @@ public class Browsing extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    // checks Internet connection
+    private Boolean isOnline() {
+        ConnectivityManager connMgr = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        return (networkInfo != null && networkInfo.isConnected());
+    }
+
     /**
      * Opens Settings Activity
      */
@@ -75,6 +78,7 @@ public class Browsing extends AppCompatActivity {
         startActivity(intent);
     }
 
+    // On API 15+ network tasks needs to be executed asynchronous
     private class GetRssDataTask extends AsyncTask<String, Void, List<RssItem>> {
         @Override
         protected List<RssItem> doInBackground(String... urls) {
@@ -89,12 +93,18 @@ public class Browsing extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(List<RssItem> rssItems) {
-            ListView listView = (ListView)findViewById(R.id.listView);
-            ArrayAdapter<RssItem> adapter = new ArrayAdapter<RssItem>(localActivity,
-                    android.R.layout.simple_list_item_1, rssItems);
-            listView.setAdapter(adapter);
-            listView.setOnItemClickListener(new ListListener(rssItems, localActivity));
+            if (rssItems != null) {
+                List<String> titles = new ArrayList<String>();
+                for (int i = 0; i < rssItems.size(); i++) {
+                    titles.add(rssItems.get(i).getTitle());
+                }
+                ListView listView = (ListView)findViewById(R.id.listView);
+
+                ArrayAdapter<String> adapter = new ArrayAdapter<String>(localActivity,
+                        android.R.layout.simple_list_item_1, titles);
+                listView.setAdapter(adapter);
+                listView.setOnItemClickListener(new ListListener(rssItems, localActivity));
+            }
         }
     }
-
 }

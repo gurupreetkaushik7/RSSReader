@@ -5,10 +5,10 @@ package com.example.rssreader.model;
  */
 public class RssItem {
     String title;
-    //String description;
+    String description;
     String link;
-    //String author;
-    //String pubDate;
+    String author;
+    String pubDate;
     //String imgUrl;
 
 //    public String getImgUrl() {
@@ -19,13 +19,13 @@ public class RssItem {
 //        this.imgUrl = imgUrl;
 //    }
 
-//    public String getPubDate() {
-//        return pubDate;
-//    }
-//
-//    public void setPubDate(String pubDate) {
-//        this.pubDate = pubDate;
-//    }
+    public String getPubDate() {
+        return pubDate;
+    }
+
+    public void setPubDate(String pubDate) {
+        this.pubDate = pubDate;
+    }
 
     public String getTitle() {
         return title;
@@ -35,13 +35,13 @@ public class RssItem {
         this.title = title;
     }
 
-//    public String getAuthor() {
-//        return author;
-//    }
-//
-//    public void setAuthor(String author) {
-//        this.author = author;
-//    }
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
 
     public String getLink() {
         return link;
@@ -51,11 +51,11 @@ public class RssItem {
         this.link = link;
     }
 
-//    public String getDescription() {
-//        return description;
-//    }
-//
-//    public void setDescription(String description) {
-//        this.description = description;
-//    }
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 }

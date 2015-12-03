@@ -1,6 +1,7 @@
 package com.example.rssreader.model;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
@@ -18,7 +19,7 @@ public class RssReader {
         this.rssUrl = url;
     }
 
-    public List<RssItem> getItems() throws Exception{
+    public List<RssItem> getItems() throws Exception {
         SAXParserFactory factory = SAXParserFactory.newInstance();
         SAXParser saxParser = factory.newSAXParser();
         RssParseHandler handler = new RssParseHandler();
