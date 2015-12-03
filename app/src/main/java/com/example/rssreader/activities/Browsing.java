@@ -1,5 +1,6 @@
 package com.example.rssreader.activities;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -15,6 +16,7 @@ import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.example.rssreader.BrowsingListAdapter;
 import com.example.rssreader.ListListener;
 import com.example.rssreader.R;
 import com.example.rssreader.data.SharedPreferencesHandler;
@@ -25,8 +27,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Browsing extends AppCompatActivity {
-    private Browsing localActivity;
+    private Activity localActivity;
     private SharedPreferencesHandler prefHandler;
+    private String rssUrl;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,14 +37,32 @@ public class Browsing extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         prefHandler = new SharedPreferencesHandler(this);
+        rssUrl = prefHandler.loadRssUrlFromPrefs();
 
         localActivity = this; // set reference to this activity
 
         if (isOnline()) {
             GetRssDataTask rssReadingTask = new GetRssDataTask();
-            String rssUrl = prefHandler.loadRssUrlFromPrefs();
-            rssReadingTask.execute(rssUrl);
+            try {
+                rssReadingTask.execute(rssUrl);
+            } catch(Exception e) {
+                // do something
+            }
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK) {
+            if (data.getBooleanExtra("changed", false)) {
+                rssUrl = prefHandler.loadRssUrlFromPrefs();
+                reloadWithNewUrl();
+            }
+        }
+    }
+
+    private void clearData() {
+
     }
 
     @Override
@@ -57,28 +78,39 @@ public class Browsing extends AppCompatActivity {
 
         if (id == R.id.action_settings) {
             openSettingsActivity();
-            return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
+    private boolean reloadWithNewUrl() {
+        if (isOnline()) {
+            GetRssDataTask rssReadingTask = new GetRssDataTask();
+            try {
+                rssReadingTask.execute(rssUrl);
+            } catch (Exception e) {
+                return false;
+            }
+        } else {
+            //offline
+        }
+        return true;
+    }
+
     // checks Internet connection
-    private Boolean isOnline() {
+    private boolean isOnline() {
         ConnectivityManager connMgr = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
         return (networkInfo != null && networkInfo.isConnected());
     }
 
-    /**
-     * Opens Settings Activity
-     */
+    // Opens Settings Activity
     private void openSettingsActivity() {
         Intent intent = new Intent(this, SettingsActivity.class);
-        startActivity(intent);
+        startActivityForResult(intent, 1);
     }
 
-    // On API 15+ network tasks needs to be executed asynchronous
+    // On API 15+ network tasks needs to be executed async
     private class GetRssDataTask extends AsyncTask<String, Void, List<RssItem>> {
         @Override
         protected List<RssItem> doInBackground(String... urls) {
@@ -99,9 +131,9 @@ public class Browsing extends AppCompatActivity {
                     titles.add(rssItems.get(i).getTitle());
                 }
                 ListView listView = (ListView)findViewById(R.id.listView);
-
-                ArrayAdapter<String> adapter = new ArrayAdapter<String>(localActivity,
-                        android.R.layout.simple_list_item_1, titles);
+                BrowsingListAdapter adapter = new BrowsingListAdapter(localActivity, rssItems);
+//                ArrayAdapter<String> adapter = new ArrayAdapter<String>(localActivity,
+//                        android.R.layout.simple_list_item_1, titles);
                 listView.setAdapter(adapter);
                 listView.setOnItemClickListener(new ListListener(rssItems, localActivity));
             }
