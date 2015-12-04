@@ -132,8 +132,6 @@ public class Browsing extends AppCompatActivity {
                 }
                 ListView listView = (ListView)findViewById(R.id.listView);
                 BrowsingListAdapter adapter = new BrowsingListAdapter(localActivity, rssItems);
-//                ArrayAdapter<String> adapter = new ArrayAdapter<String>(localActivity,
-//                        android.R.layout.simple_list_item_1, titles);
                 listView.setAdapter(adapter);
                 listView.setOnItemClickListener(new ListListener(rssItems, localActivity));
             }
