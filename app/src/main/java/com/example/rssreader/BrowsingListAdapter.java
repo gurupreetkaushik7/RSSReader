@@ -41,10 +41,11 @@ public class BrowsingListAdapter extends BaseAdapter {
         }
         TextView title = (TextView)view.findViewById(R.id.feed_title);
         TextView description = (TextView)view.findViewById(R.id.description);
+
         ImageView thumbImage = (ImageView)view.findViewById(R.id.list_image);
         RssItem feedItem = data.get(position);
         title.setText(feedItem.getTitle());
-        description.setText(feedItem.getDescription());
+        description.setText(getShortDescription(feedItem.getDescription(), 50));
 
         /**
          * TODO : add image from url
@@ -56,6 +57,14 @@ public class BrowsingListAdapter extends BaseAdapter {
         ///////////
 
         return view;
+    }
+
+    private String getShortDescription(String description, int length) {
+        if (length < description.length()) {
+            return description.substring(0, length) + "...";
+        } else {
+            return description;
+        }
     }
 
     @Override

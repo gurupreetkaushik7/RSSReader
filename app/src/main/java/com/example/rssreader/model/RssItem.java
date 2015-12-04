@@ -8,8 +8,17 @@ public class RssItem {
     String description;
     String link;
     String author;
-    String pubDate;
+    String pubDate; // TODO : use SimpleDateFormat for represent date
     String imgUrl;
+
+    public RssItem(String title, String link, String description, String author,
+                   String pubDate) {
+        this.title = title;
+        this.link = link;
+        this.description = description;
+        this.author = author;
+        this.pubDate = pubDate;
+    }
 
     public String getImgUrl() {
         return imgUrl;

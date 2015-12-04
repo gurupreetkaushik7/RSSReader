@@ -1,0 +1,4 @@
+http://lenta.ru/rss/news
+http://ria.ru/export/rss2/science/index.xml
+https://sports.yahoo.com/nba/rss.xml
+http://rss.nytimes.com/services/xml/rss/nyt/Space.xml
