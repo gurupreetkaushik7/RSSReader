@@ -9,15 +9,15 @@ public class RssItem {
     String link;
     String author;
     String pubDate;
-    //String imgUrl;
+    String imgUrl;
 
-//    public String getImgUrl() {
-//        return imgUrl;
-//    }
-//
-//    public void setImgUrl(String imgUrl) {
-//        this.imgUrl = imgUrl;
-//    }
+    public String getImgUrl() {
+        return imgUrl;
+    }
+
+    public void setImgUrl(String imgUrl) {
+        this.imgUrl = imgUrl;
+    }
 
     public String getPubDate() {
         return pubDate;

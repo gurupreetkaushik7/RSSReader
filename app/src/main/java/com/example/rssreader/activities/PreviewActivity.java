@@ -1,5 +1,6 @@
 package com.example.rssreader.activities;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
@@ -29,6 +30,7 @@ public class PreviewActivity extends AppCompatActivity {
      * TODO : handle parsing date by locale
      */
     private void loadElements() {
+        final Activity activity = this;
         title = getIntent().getStringExtra("title");
         author = getIntent().getStringExtra("author");
         description = getIntent().getStringExtra("description");
@@ -46,8 +48,10 @@ public class PreviewActivity extends AppCompatActivity {
         titleTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(Uri.parse(link));
+//                Intent intent = new Intent(Intent.ACTION_VIEW);
+//                intent.setData(Uri.parse(link));
+                Intent intent = new Intent(activity, WebViewActivity.class);
+                intent.putExtra("link", link);
                 startActivity(intent);
             }
         });

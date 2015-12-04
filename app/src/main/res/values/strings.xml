@@ -5,5 +5,5 @@
     <string name="tb_rss_source">RSS source</string>
     <string name="apply_rss">Apply</string>
     <string name="rss_url_pref">rss</string>
-    <string name="standard_rss">http://www.aweber.com/blog/feed</string>
+    <string name="standard_rss">http://lenta.ru/rss/news</string>
 </resources>

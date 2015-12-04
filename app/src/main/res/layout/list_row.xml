@@ -34,7 +34,7 @@
         android:textColor="#040404"
         android:typeface="sans"
         android:textSize="15sp"
-        android:textStyle="bold"/>
+        android:textStyle="bold" />
 
     <!-- Little description -->
     <TextView

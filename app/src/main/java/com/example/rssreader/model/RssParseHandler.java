@@ -18,6 +18,7 @@ public class RssParseHandler extends DefaultHandler {
     static String AUTHOR = "author";
     static String DATE = "pubDate";
 
+
     private List<RssItem> rssItems; // contains all rss items
 
     private RssItem currentRssItem; // used to reference item while parsing
