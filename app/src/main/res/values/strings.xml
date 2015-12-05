@@ -5,5 +5,5 @@
     <string name="tb_rss_source">RSS source</string>
     <string name="apply_rss">Apply</string>
     <string name="rss_url_pref">rss</string>
-    <string name="standard_rss">http://rss.nytimes.com/services/xml/rss/nyt/Space.xml</string>
+    <string name="standard_rss">https://sports.yahoo.com/nba/rss.xml</string>
 </resources>

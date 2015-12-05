@@ -46,19 +46,13 @@ public class BrowsingListAdapter extends BaseAdapter {
         RssItem feedItem = data.get(position);
         title.setText(feedItem.getTitle());
         description.setText(getShortDescription(feedItem.getDescription(), 50));
-
-        /**
-         * TODO : add image from url
-         */
-//        String uri = "@drawable/k";
-//        int imageRes = activity.getResources().getIdentifier(uri, null, activity.getPackageName());
-//        Drawable draw = activity.getResources().getDrawable(imageRes);
-//        thumbImage.setImageDrawable(draw);
-        ///////////
+        thumbImage.setImageBitmap(feedItem.getImage());
 
         return view;
     }
 
+
+    // gets substring of description
     private String getShortDescription(String description, int length) {
         if (length < description.length()) {
             return description.substring(0, length) + "...";

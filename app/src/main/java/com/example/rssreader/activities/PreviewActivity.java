@@ -6,9 +6,12 @@ import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.rssreader.R;
+
+import java.text.SimpleDateFormat;
 
 public class PreviewActivity extends AppCompatActivity {
     private String title;
@@ -26,7 +29,7 @@ public class PreviewActivity extends AppCompatActivity {
 
     /**
      * Loads from intent and sets data in elements
-     * TODO : add image loading
+     * TODO : everything must be loaded from sql
      * TODO : handle parsing date by locale
      */
     private void loadElements() {
@@ -40,10 +43,13 @@ public class PreviewActivity extends AppCompatActivity {
         TextView authorTextView = (TextView)findViewById(R.id.preview_author);
         TextView descriptionTextView = (TextView)findViewById(R.id.preview_description);
         TextView pubDateTextView = (TextView)findViewById(R.id.preview_dateTime);
+        ImageView imageView = (ImageView)findViewById(R.id.preview_image);
         titleTextView.setText(title);
         authorTextView.setText(author);
         descriptionTextView.setText(description);
-        pubDateTextView.setText(pubDate);
+//        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd - hh:mm:ss");
+//        pubDateTextView.setText(dateFormat.format(pubDate));
+
 
         titleTextView.setOnClickListener(new View.OnClickListener() {
             @Override
