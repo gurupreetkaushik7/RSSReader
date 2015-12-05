@@ -3,6 +3,7 @@ package com.example.rssreader.model;
 import android.graphics.Bitmap;
 import android.media.Image;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -13,11 +14,11 @@ public class RssItem {
     String description;
     String link;
     String author;
-    Date pubDate;
+    String pubDate;
     Bitmap imageBitmap;
 
     public RssItem(String title, String link, String description, String author,
-                   Date pubDate, Bitmap imageBitmap) {
+                   String pubDate, Bitmap imageBitmap) {
         this.title = title;
         this.link = link;
         this.description = description;
@@ -34,11 +35,11 @@ public class RssItem {
         this.imageBitmap = imageBitmap;
     }
 
-    public Date getPubDate() {
+    public String getPubDate() {
         return pubDate;
     }
 
-    public void setPubDate(Date pubDate) {
+    public void setPubDate(String pubDate) {
         this.pubDate = pubDate;
     }
 

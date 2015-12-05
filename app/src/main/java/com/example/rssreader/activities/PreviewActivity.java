@@ -48,7 +48,7 @@ public class PreviewActivity extends AppCompatActivity {
         authorTextView.setText(author);
         descriptionTextView.setText(description);
 //        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd - hh:mm:ss");
-//        pubDateTextView.setText(dateFormat.format(pubDate));
+        pubDateTextView.setText(pubDate);
 
 
         titleTextView.setOnClickListener(new View.OnClickListener() {

@@ -19,6 +19,7 @@ import android.widget.ListView;
 import com.example.rssreader.BrowsingListAdapter;
 import com.example.rssreader.ListListener;
 import com.example.rssreader.R;
+import com.example.rssreader.data.DBHandler;
 import com.example.rssreader.data.SharedPreferencesHandler;
 import com.example.rssreader.model.RssItem;
 import com.example.rssreader.model.RssReader;
@@ -30,16 +31,19 @@ public class Browsing extends AppCompatActivity {
     private Activity localActivity;
     private SharedPreferencesHandler prefHandler;
     private String rssUrl;
+    private DBHandler databaseHandler;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_browsing);
+        localActivity = this;
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         prefHandler = new SharedPreferencesHandler(this);
         rssUrl = prefHandler.loadRssUrlFromPrefs();
-
-        localActivity = this; // set reference to this activity
+        databaseHandler = new DBHandler(this);
+        //databaseHandler.deleteAll();
+        readDataBase();
 
         if (isOnline()) {
             GetRssDataTask rssReadingTask = new GetRssDataTask();
@@ -51,7 +55,17 @@ public class Browsing extends AppCompatActivity {
         }
     }
 
+    private void readDataBase() {
+        List<RssItem> rssItems = databaseHandler.getAllRssItems();
+        for (RssItem item : rssItems) {
+            String log = "Title : " + item.getTitle();
+            System.out.print("ITEM: ");
+            System.out.println(log);
+        }
+    }
+
     @Override
+    // Gets result of SettingActivity and handle reloading if URL was changed
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
             if (data.getBooleanExtra("changed", false)) {
@@ -59,10 +73,6 @@ public class Browsing extends AppCompatActivity {
                 reloadWithNewUrl();
             }
         }
-    }
-
-    private void clearData() {
-
     }
 
     @Override
@@ -83,6 +93,7 @@ public class Browsing extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    // Reloads data with data from new URL
     private boolean reloadWithNewUrl() {
         if (isOnline()) {
             GetRssDataTask rssReadingTask = new GetRssDataTask();
@@ -106,6 +117,7 @@ public class Browsing extends AppCompatActivity {
 
     // Opens Settings Activity
     private void openSettingsActivity() {
+        readDataBase();
         Intent intent = new Intent(this, SettingsActivity.class);
         startActivityForResult(intent, 1);
     }
@@ -115,7 +127,7 @@ public class Browsing extends AppCompatActivity {
         @Override
         protected List<RssItem> doInBackground(String... urls) {
             try {
-                RssReader rssReader = new RssReader(urls[0]);
+                RssReader rssReader = new RssReader(urls[0], localActivity);
                 return rssReader.getItems();
             } catch (Exception e) {
                 Log.e("RSSReader", e.getMessage());
@@ -126,10 +138,6 @@ public class Browsing extends AppCompatActivity {
         @Override
         protected void onPostExecute(List<RssItem> rssItems) {
             if (rssItems != null) {
-                List<String> titles = new ArrayList<String>();
-                for (int i = 0; i < rssItems.size(); i++) {
-                    titles.add(rssItems.get(i).getTitle());
-                }
                 ListView listView = (ListView)findViewById(R.id.listView);
                 BrowsingListAdapter adapter = new BrowsingListAdapter(localActivity, rssItems);
                 listView.setAdapter(adapter);

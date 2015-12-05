@@ -18,12 +18,12 @@ import java.util.List;
  * Custom adapter for ListView in Browsing activity
  */
 public class BrowsingListAdapter extends BaseAdapter {
-    private Activity activity;
+    private Activity parentActivity;
     private List<RssItem> data;
     private static LayoutInflater inflater = null;
 
     public BrowsingListAdapter(Activity activity, List<RssItem> data) {
-        this.activity = activity;
+        this.parentActivity = activity;
         this.data = data;
         inflater = (LayoutInflater)activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
@@ -41,7 +41,6 @@ public class BrowsingListAdapter extends BaseAdapter {
         }
         TextView title = (TextView)view.findViewById(R.id.feed_title);
         TextView description = (TextView)view.findViewById(R.id.description);
-
         ImageView thumbImage = (ImageView)view.findViewById(R.id.list_image);
         RssItem feedItem = data.get(position);
         title.setText(feedItem.getTitle());

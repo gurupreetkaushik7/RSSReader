@@ -1,8 +1,11 @@
 package com.example.rssreader.model;
 
+import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.Image;
+
+import com.example.rssreader.data.DBHandler;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -14,10 +17,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -31,10 +37,22 @@ public class RssReader {
     private String rssUrl;
     private ArrayList<RssItem> rssItems;
     private Element entry;
+    private DBHandler databaseHandler;
+    private Date lastPubDate;
+    private Boolean isDataBaseWOLastPubDate;
 
-    public RssReader(String url) {
+    public RssReader(String url, Activity activity) {
         this.rssUrl = url;
         rssItems = new ArrayList<RssItem>();
+        databaseHandler = new DBHandler(activity);
+        String lastPubDateString = databaseHandler.getLastPubDate();
+        isDataBaseWOLastPubDate = false;
+        if (lastPubDateString == null)
+        {
+            isDataBaseWOLastPubDate = true;
+        } else {
+            lastPubDate = new Date(lastPubDateString);
+        }
     }
 
     public List<RssItem> getItems() throws Exception {
@@ -68,11 +86,24 @@ public class RssReader {
                             parseAuthor(),
                             parseDate(),
                             parseImageBitmap());
+                    // loading while time in feed item > time from last item from database
+                    if (!isActual(rssItem.getPubDate())) {
+                        break;
+                    }
+                    databaseHandler.addRssItem(rssItem); // TODO : пока что выход в листвью идет из массива рссИтемс, сделать база, затем новые записи
                     rssItems.add(rssItem);
                 }
             }
         }
         return rssItems;
+    }
+
+    private Boolean isActual(String pubDate){
+        if (isDataBaseWOLastPubDate) {
+            return true;
+        }
+        Date pubTime = new Date(pubDate);
+        return lastPubDate.compareTo(pubTime) < 0;
     }
 
     private String parseTitle() {
@@ -127,12 +158,12 @@ public class RssReader {
         return author;
     }
 
-    private Date parseDate() {
-        Date pubDate = null;
+    private String parseDate() {
+        String pubDate = null;
         Element pubDateElement = (Element)entry.getElementsByTagName("pubDate").item(0);
         if (pubDateElement != null) {
             if (pubDateElement.hasChildNodes()) {
-                pubDate = new Date(pubDateElement.getFirstChild().getNodeValue());
+                pubDate = pubDateElement.getFirstChild().getNodeValue();
             }
         }
         return pubDate;
