@@ -15,6 +15,8 @@ import com.example.rssreader.model.RssItem;
 
 import java.text.SimpleDateFormat;
 
+
+//TODO : parse date by local settings
 public class PreviewActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {

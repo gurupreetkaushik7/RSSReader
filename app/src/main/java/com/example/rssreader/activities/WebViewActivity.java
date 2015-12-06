@@ -7,6 +7,7 @@ import android.webkit.WebView;
 
 import com.example.rssreader.R;
 
+// TODO : disable redirecting
 public class WebViewActivity extends AppCompatActivity {
     private String link;
 

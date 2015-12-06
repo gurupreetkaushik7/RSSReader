@@ -8,13 +8,12 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import com.example.rssreader.model.RssItem;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Simple ORM-like SQLite database handler
- * Images will be save outside DB
- * TODO : Save images outside DB using index in name
  */
 public class DBHandler extends SQLiteOpenHelper {
     static String DATABASE_NAME = "feedDB";
@@ -106,10 +105,11 @@ public class DBHandler extends SQLiteOpenHelper {
         return items;
     }
 
-    public void deleteAll() {
+    public void deleteAll(){
         SQLiteDatabase database = this.getWritableDatabase();
-        database.delete(TABLE_FEED, null, null);
-        database.close();
+        database.execSQL("DROP TABLE " + TABLE_FEED);
+        //database.close();
+        this.onCreate(database);
     }
 
     public int length() {

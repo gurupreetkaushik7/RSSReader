@@ -89,11 +89,9 @@ public class Browsing extends AppCompatActivity {
     // Gets result of SettingActivity and handle reloading if URL was changed
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
-            if (data.getBooleanExtra("changed", false)) {
+            if (data.getBooleanExtra("changed", true)) {
                 rssUrl = prefHandler.loadRssUrlFromPrefs();
-                if (!reloadWithNewUrl()) {
-                    showToast("Failure while reloading");
-                }
+                reloadWithNewUrl();
             }
         }
     }
@@ -117,10 +115,11 @@ public class Browsing extends AppCompatActivity {
     }
 
     // Reloads data with data from new URL
-    private boolean reloadWithNewUrl() {
+    private void reloadWithNewUrl() {
         databaseHandler.deleteAll();
+        rssItems.clear();
+        adapter.notifyDataSetChanged();
         tryGetNewFeed();
-        return true;
     }
 
     // checks Internet connection

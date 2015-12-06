@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.Image;
+import android.util.Log;
 
 import com.example.rssreader.data.DBHandler;
 
@@ -39,6 +40,8 @@ public class RssReader {
     private DBHandler databaseHandler;
     private Date lastPubDate;
     private Boolean isDataBaseWOLastPubDate;
+    static int maxItemsCount = 50; // just for now (large feeds are bad)
+    // (later can be used to swipe down to continue reading old feed)
 
     public RssReader(String url, Activity activity) {
         this.rssUrl = url;
@@ -51,6 +54,31 @@ public class RssReader {
         } else {
             lastPubDate = new Date(lastPubDateString);
         }
+    }
+
+    // Checks that url contains xml with rss
+    public Boolean isValid() throws Exception{
+        HttpURLConnection conn = null;
+        int responseCode = 0;
+        try {
+            URL url = new URL(rssUrl);
+            conn = (HttpURLConnection) url.openConnection();
+            responseCode = conn.getResponseCode();
+        } catch (Exception e)
+        {
+            Log.e("validatingUrl", e.getMessage());
+            return false;
+        }
+        if (responseCode == HttpURLConnection.HTTP_OK) {
+            InputStream is = conn.getInputStream();
+            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory
+                    .newInstance();
+            DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+            Document document = documentBuilder.parse(is);
+            Element element = document.getDocumentElement();
+            return element.getTagName().equals("rss");
+        }
+        return false;
     }
 
     // Read and parse RSS FEED, push new items into database
@@ -76,7 +104,8 @@ public class RssReader {
             NodeList nodeList = element.getElementsByTagName("item");
             if (nodeList.getLength() > 0) {
                 List<RssItem> rssItems = new ArrayList<RssItem>();
-                for (int i = 0; i < nodeList.getLength(); i++) {
+                for (int i = 0; i < nodeList.getLength() && newItemsCount <= maxItemsCount;
+                     i++, newItemsCount++) {
                     //take each entry (matches <item></item> tags in xml data
                     entry = (Element) nodeList.item(i);
 
@@ -95,8 +124,6 @@ public class RssReader {
                         break;
                     }
                     rssItems.add(rssItem);
-                    newItemsCount++;
-
                 }
                 for (int i = rssItems.size() - 1; i >=0 ; i--)
                 {
