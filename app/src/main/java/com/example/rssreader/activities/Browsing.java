@@ -11,10 +11,12 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.example.rssreader.BrowsingListAdapter;
 import com.example.rssreader.ListListener;
@@ -32,6 +34,9 @@ public class Browsing extends AppCompatActivity {
     private SharedPreferencesHandler prefHandler;
     private String rssUrl;
     private DBHandler databaseHandler;
+    private ListView listView;
+    private List<RssItem> rssItems;
+    private BrowsingListAdapter adapter;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,30 +44,29 @@ public class Browsing extends AppCompatActivity {
         localActivity = this;
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        listView = (ListView)findViewById(R.id.listView);
         prefHandler = new SharedPreferencesHandler(this);
         rssUrl = prefHandler.loadRssUrlFromPrefs();
         databaseHandler = new DBHandler(this);
-        //databaseHandler.deleteAll();
-        readDataBase();
 
+        // Firstly, load database and set data to ListView
+        initListView();
+
+        //Secondly, trying to get new feed from url
         if (isOnline()) {
             GetRssDataTask rssReadingTask = new GetRssDataTask();
             try {
                 rssReadingTask.execute(rssUrl);
             } catch(Exception e) {
-                // do something
+                showToast("Exception while trying to read feed from url");
+                Log.e("RSSReader", e.getMessage());
             }
+        } else {
+            showToast("You are offline");
         }
     }
 
-    private void readDataBase() {
-        List<RssItem> rssItems = databaseHandler.getAllRssItems();
-        for (RssItem item : rssItems) {
-            String log = "Title : " + item.getTitle();
-            System.out.print("ITEM: ");
-            System.out.println(log);
-        }
-    }
+
 
     @Override
     // Gets result of SettingActivity and handle reloading if URL was changed
@@ -70,7 +74,9 @@ public class Browsing extends AppCompatActivity {
         if (resultCode == RESULT_OK) {
             if (data.getBooleanExtra("changed", false)) {
                 rssUrl = prefHandler.loadRssUrlFromPrefs();
-                reloadWithNewUrl();
+                if (!reloadWithNewUrl()) {
+                    showToast("Failure while reloading");
+                }
             }
         }
     }
@@ -95,15 +101,17 @@ public class Browsing extends AppCompatActivity {
 
     // Reloads data with data from new URL
     private boolean reloadWithNewUrl() {
+        databaseHandler.deleteAll();
         if (isOnline()) {
             GetRssDataTask rssReadingTask = new GetRssDataTask();
             try {
                 rssReadingTask.execute(rssUrl);
+                initListView();
             } catch (Exception e) {
                 return false;
             }
         } else {
-            //offline
+            showToast(getString(R.string.offline_msg));
         }
         return true;
     }
@@ -117,32 +125,53 @@ public class Browsing extends AppCompatActivity {
 
     // Opens Settings Activity
     private void openSettingsActivity() {
-        readDataBase();
         Intent intent = new Intent(this, SettingsActivity.class);
         startActivityForResult(intent, 1);
     }
 
     // On API 15+ network tasks needs to be executed async
-    private class GetRssDataTask extends AsyncTask<String, Void, List<RssItem>> {
+    private class GetRssDataTask extends AsyncTask<String, Void, Integer> {
         @Override
-        protected List<RssItem> doInBackground(String... urls) {
+        protected Integer doInBackground(String... urls) {
             try {
                 RssReader rssReader = new RssReader(urls[0], localActivity);
-                return rssReader.getItems();
+                return rssReader.updateDB();
             } catch (Exception e) {
                 Log.e("RSSReader", e.getMessage());
             }
-            return null;
+            return 0;
         }
 
         @Override
-        protected void onPostExecute(List<RssItem> rssItems) {
-            if (rssItems != null) {
-                ListView listView = (ListView)findViewById(R.id.listView);
-                BrowsingListAdapter adapter = new BrowsingListAdapter(localActivity, rssItems);
-                listView.setAdapter(adapter);
-                listView.setOnItemClickListener(new ListListener(rssItems, localActivity));
+        protected void onPostExecute(Integer newItemsCount) {
+            if (newItemsCount > 0) {
+                showToast(getString(R.string.found_items) + " " + newItemsCount.toString() + " "
+                        + getString(R.string.new_items));
+                updateListView(newItemsCount);
+                // TODO: use some marker to say 'pulltorefresh' that new items found and exec updateListView in pull to refresh handler
             }
         }
+    }
+
+    // Sets adapter to ListView filled with rows from database
+    private void initListView() {
+        rssItems = databaseHandler.getAllRssItems();
+        adapter = new BrowsingListAdapter(localActivity, rssItems);
+        listView.setAdapter(adapter);
+        listView.setOnItemClickListener(new ListListener(rssItems, localActivity));
+    }
+
+    private void showToast(String toastText) {
+        Toast toast =  Toast.makeText(Browsing.this, toastText, Toast.LENGTH_LONG);
+        toast.setGravity(Gravity.TOP, 0, 0);
+        toast.show();
+    }
+
+    private void updateListView(int newItemsCount) {
+        int itemsInDBCount = databaseHandler.length();
+        for (int i = 1; i <= itemsInDBCount; i++) {
+            rssItems.add(0, databaseHandler.getRssItem(i));
+        }
+        adapter.notifyDataSetChanged();
     }
 }

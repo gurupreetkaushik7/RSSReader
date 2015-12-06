@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_settings">Настройки</string>
+    <string name="apply_rss">Принять</string>
+    <string name="tb_rss_source">Источник ленты</string>
+    <string name="offline_msg">Нет подключения к сети</string>
+    <string name="found_items">Потяните вниз, чтобы показать</string>
+    <string name="new_items">новых записей</string>
+    <string name="preview_author">Автор не указан</string>
+</resources>

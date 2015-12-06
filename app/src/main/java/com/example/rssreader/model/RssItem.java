@@ -10,15 +10,26 @@ import java.util.Date;
  * Represents RSS item
  */
 public class RssItem {
-    String title;
-    String description;
-    String link;
-    String author;
-    String pubDate;
-    Bitmap imageBitmap;
+    private int dbIndex;
+    private String title;
+    private String description;
+    private String link;
+    private String author;
+    private String pubDate;
+    private Bitmap imageBitmap;
 
     public RssItem(String title, String link, String description, String author,
                    String pubDate, Bitmap imageBitmap) {
+        this.title = title;
+        this.link = link;
+        this.description = description;
+        this.author = author;
+        this.pubDate = pubDate;
+        this.imageBitmap = imageBitmap;
+    }
+    public RssItem(int dbIndex, String title, String link, String description, String author,
+                   String pubDate, Bitmap imageBitmap) {
+        this.dbIndex = dbIndex;
         this.title = title;
         this.link = link;
         this.description = description;
@@ -33,6 +44,14 @@ public class RssItem {
 
     public void setImage(Bitmap imageBitmap) {
         this.imageBitmap = imageBitmap;
+    }
+
+    public int getDbIndex() {
+        return dbIndex;
+    }
+
+    public void setDbIndex(int dbIndex) {
+        this.dbIndex = dbIndex;
     }
 
     public String getPubDate() {

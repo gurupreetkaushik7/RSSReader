@@ -10,16 +10,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.rssreader.R;
+import com.example.rssreader.data.DBHandler;
+import com.example.rssreader.model.RssItem;
 
 import java.text.SimpleDateFormat;
 
 public class PreviewActivity extends AppCompatActivity {
-    private String title;
-    private String author;
-    private String description;
-    private String link;
-    private String pubDate;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -27,37 +23,30 @@ public class PreviewActivity extends AppCompatActivity {
         loadElements();
     }
 
-    /**
-     * Loads from intent and sets data in elements
-     * TODO : everything must be loaded from sql
-     * TODO : handle parsing date by locale
-     */
+    // Gets SQLite db row (via index) from intent and attach data to activity elements
     private void loadElements() {
+        DBHandler databaseHandler = new DBHandler(this);
         final Activity activity = this;
-        title = getIntent().getStringExtra("title");
-        author = getIntent().getStringExtra("author");
-        description = getIntent().getStringExtra("description");
-        link = getIntent().getStringExtra("link");
-        pubDate = getIntent().getStringExtra("pubDate");
+        int dbIndex = getIntent().getIntExtra("dbIndex", 1);
+        final RssItem item = databaseHandler.getRssItem(dbIndex);
+
         TextView titleTextView = (TextView)findViewById(R.id.preview_title);
         TextView authorTextView = (TextView)findViewById(R.id.preview_author);
         TextView descriptionTextView = (TextView)findViewById(R.id.preview_description);
         TextView pubDateTextView = (TextView)findViewById(R.id.preview_dateTime);
         ImageView imageView = (ImageView)findViewById(R.id.preview_image);
-        titleTextView.setText(title);
-        authorTextView.setText(author);
-        descriptionTextView.setText(description);
-//        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd - hh:mm:ss");
-        pubDateTextView.setText(pubDate);
 
+        titleTextView.setText(item.getTitle());
+        authorTextView.setText(item.getAuthor());
+        descriptionTextView.setText(item.getDescription());
+        pubDateTextView.setText(item.getPubDate());
+        imageView.setImageBitmap(item.getImage());
 
         titleTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                Intent intent = new Intent(Intent.ACTION_VIEW);
-//                intent.setData(Uri.parse(link));
                 Intent intent = new Intent(activity, WebViewActivity.class);
-                intent.putExtra("link", link);
+                intent.putExtra("link", item.getLink());
                 startActivity(intent);
             }
         });

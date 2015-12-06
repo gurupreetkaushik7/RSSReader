@@ -31,11 +31,10 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 /**
- * Reading and parsing RSS FEED
+ * Handle getting new feed item from url
  */
 public class RssReader {
     private String rssUrl;
-    private ArrayList<RssItem> rssItems;
     private Element entry;
     private DBHandler databaseHandler;
     private Date lastPubDate;
@@ -43,7 +42,6 @@ public class RssReader {
 
     public RssReader(String url, Activity activity) {
         this.rssUrl = url;
-        rssItems = new ArrayList<RssItem>();
         databaseHandler = new DBHandler(activity);
         String lastPubDateString = databaseHandler.getLastPubDate();
         isDataBaseWOLastPubDate = false;
@@ -55,7 +53,10 @@ public class RssReader {
         }
     }
 
-    public List<RssItem> getItems() throws Exception {
+    // Read and parse RSS FEED, push new items into database
+    // Return count of new items
+    public int updateDB() throws Exception {
+        int newItemsCount = 0;
         URL url = new URL(rssUrl);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
@@ -67,18 +68,19 @@ public class RssReader {
                     .newInstance();
             DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
 
-            //using db (Document Builder) parse xml data and assign it to Element
+            //using Document Builder to parse xml data and assign it to Element
             Document document = documentBuilder.parse(is);
             Element element = document.getDocumentElement();
 
             //take rss nodes to NodeList
             NodeList nodeList = element.getElementsByTagName("item");
             if (nodeList.getLength() > 0) {
+                List<RssItem> rssItems = new ArrayList<RssItem>();
                 for (int i = 0; i < nodeList.getLength(); i++) {
                     //take each entry (matches <item></item> tags in xml data
                     entry = (Element) nodeList.item(i);
 
-                    //create RssItemObject and add it to the ArrayList
+                    //create RssItemObject by parsing every item from 'entry'
                     RssItem rssItem = new RssItem(
                             parseTitle(),
                             parseLink(),
@@ -86,16 +88,23 @@ public class RssReader {
                             parseAuthor(),
                             parseDate(),
                             parseImageBitmap());
-                    // loading while time in feed item > time from last item from database
+
+                    // reading url until time in feed item > time from last item from database
+                    // (news are actual)
                     if (!isActual(rssItem.getPubDate())) {
                         break;
                     }
-                    databaseHandler.addRssItem(rssItem); // TODO : пока что выход в листвью идет из массива рссИтемс, сделать база, затем новые записи
                     rssItems.add(rssItem);
+                    newItemsCount++;
+
+                }
+                for (int i = rssItems.size() - 1; i >=0 ; i--)
+                {
+                    databaseHandler.addRssItem(rssItems.get(i));
                 }
             }
         }
-        return rssItems;
+        return newItemsCount;
     }
 
     private Boolean isActual(String pubDate){
@@ -148,8 +157,7 @@ public class RssReader {
 
     private String parseAuthor() {
         String author = "";
-        Element authorElement = (Element) entry.getElementsByTagName(
-                "author").item(0);
+        Element authorElement = (Element) entry.getElementsByTagName("author").item(0);
         if (authorElement != null) {
             if (authorElement.hasChildNodes()) {
                 author = authorElement.getFirstChild().getNodeValue();
@@ -181,13 +189,18 @@ public class RssReader {
         {
             imageUrl = mediaContentElement.getAttribute("url");
         }
-        return loadBitmapFromUrl(imageUrl);
+        if (!imageUrl.equals("")) {
+            return loadBitmapFromUrl(imageUrl);
+        }
+        else {
+            return null;
+        }
     }
 
     private Bitmap loadBitmapFromUrl(String url) {
         Bitmap bitmap = null;
         try {
-            bitmap = BitmapFactory.decodeStream((InputStream) new URL(url).getContent());
+            bitmap = BitmapFactory.decodeStream((InputStream)new URL(url).getContent());
         } catch (Exception e) {
             e.printStackTrace();
         }

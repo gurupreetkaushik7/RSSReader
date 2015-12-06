@@ -29,14 +29,8 @@ public class ListListener implements OnItemClickListener
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id)
     {
-        //Intent intent = new Intent(Intent.ACTION_VIEW);
-        //intent.setData(Uri.parse(listItems.get(position).getLink()));
         Intent intent = new Intent(activity, PreviewActivity.class);
-        intent.putExtra("title", listItems.get(position).getTitle());
-        intent.putExtra("author", listItems.get(position).getAuthor());
-        intent.putExtra("description", listItems.get(position).getDescription());
-        intent.putExtra("link", listItems.get(position).getLink());
-        intent.putExtra("pubDate", listItems.get(position).getPubDate());
+        intent.putExtra("dbIndex", listItems.get(position).getDbIndex());
         activity.startActivity(intent);
     }
 }

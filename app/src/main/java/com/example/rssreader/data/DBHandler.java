@@ -26,9 +26,12 @@ public class DBHandler extends SQLiteOpenHelper {
     static String KEY_DESCRIPTION = "description";
     static String KEY_AUTHOR = "author";
     static String KEY_PUB_DATE = "pubDate";
+    static String KEY_IMAGE = "image";
+    private BitmapCompressor compressor;
 
     public DBHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        compressor = new BitmapCompressor();
     }
 
     @Override
@@ -39,7 +42,8 @@ public class DBHandler extends SQLiteOpenHelper {
                 + KEY_LINK + " TEXT,"
                 + KEY_DESCRIPTION + " TEXT,"
                 + KEY_AUTHOR + " TEXT,"
-                + KEY_PUB_DATE + " TEXT)";
+                + KEY_PUB_DATE + " TEXT,"
+                + KEY_IMAGE + " BLOB)";
         db.execSQL(createTable);
     }
 
@@ -57,6 +61,7 @@ public class DBHandler extends SQLiteOpenHelper {
         contentValues.put(KEY_DESCRIPTION, item.getDescription());
         contentValues.put(KEY_AUTHOR, item.getAuthor());
         contentValues.put(KEY_PUB_DATE, item.getPubDate());
+        contentValues.put(KEY_IMAGE, compressor.getBytes(item.getImage()));
         database.insert(TABLE_FEED, null, contentValues);
         database.close();
     }
@@ -65,14 +70,19 @@ public class DBHandler extends SQLiteOpenHelper {
         SQLiteDatabase database = this.getReadableDatabase();
         Cursor cursor = database.query(
                 TABLE_FEED,
-                new String[] {KEY_TITLE, KEY_LINK, KEY_DESCRIPTION, KEY_AUTHOR, KEY_PUB_DATE},
+                new String[]{KEY_ID, KEY_TITLE, KEY_LINK, KEY_DESCRIPTION, KEY_AUTHOR,
+                        KEY_PUB_DATE, KEY_IMAGE},
                 KEY_ID + "=?",
                 new String[]{String.valueOf(id)}, null, null, null, null);
+        RssItem item = new RssItem(null, null, null, null, null, null);
         if (cursor != null) {
             cursor.moveToFirst();
+            item = new RssItem(cursor.getInt(0),
+                    cursor.getString(1), cursor.getString(2), cursor.getString(3),
+                    cursor.getString(4), cursor.getString(5),
+                    compressor.getImage(cursor.getBlob(6)));
         }
-        RssItem item = new RssItem(cursor.getString(0), cursor.getString(1), cursor.getString(2),
-                cursor.getString(3), cursor.getString(4), null); // TODO : load image in 'null'
+        database.close();
         cursor.close();
         return  item;
     }
@@ -82,15 +92,17 @@ public class DBHandler extends SQLiteOpenHelper {
         String selectQuery = "SELECT  * FROM " + TABLE_FEED;
         List<RssItem> items = new ArrayList<RssItem>();
         Cursor cursor = database.rawQuery(selectQuery, null);
-        if (cursor.moveToFirst()) {
+        if (cursor.moveToLast()) {
             do {
-                RssItem item = new RssItem(
+                RssItem item = new RssItem( cursor.getInt(0),
                         cursor.getString(1), cursor.getString(2), cursor.getString(3),
-                        cursor.getString(4), cursor.getString(5), null);
+                        cursor.getString(4), cursor.getString(5),
+                        compressor.getImage(cursor.getBlob(6)));
                 items.add(item);
-            } while (cursor.moveToNext());
+            } while (cursor.moveToPrevious());
         }
         cursor.close();
+        database.close();
         return items;
     }
 
@@ -104,20 +116,23 @@ public class DBHandler extends SQLiteOpenHelper {
         String countQuery = "SELECT  * FROM " + TABLE_FEED;
         SQLiteDatabase database = this.getReadableDatabase();
         Cursor cursor = database.rawQuery(countQuery, null);
+        int length = cursor.getCount();
         cursor.close();
-        return cursor.getCount();
+        database.close();
+        return length;
     }
 
     public String getLastPubDate() {
         SQLiteDatabase database = this.getReadableDatabase();
         String selectQuery = "SELECT * FROM " + TABLE_FEED + " WHERE " + KEY_ID + " = " +
-                "(SELECT MIN(" + KEY_ID + ") FROM " + TABLE_FEED + ")";
+                "(SELECT MAX(" + KEY_ID + ") FROM " + TABLE_FEED + ")";
         Cursor cursor = database.rawQuery(selectQuery, null);
         String lastPubDate = null;
         if (cursor.moveToFirst()) {
             lastPubDate = cursor.getString(5);
         }
         cursor.close();
+        database.close();
         return lastPubDate;
     }
 }

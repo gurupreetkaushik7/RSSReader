@@ -17,7 +17,6 @@
         android:typeface="sans"
         android:textSize="20sp"
         android:textStyle="bold"
-        android:text="Title"
         android:id="@+id/preview_title"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
@@ -29,7 +28,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Author"
+        android:text="@string/preview_author"
         android:textColor="#040404"
         android:id="@+id/preview_author"
         android:layout_below="@+id/preview_title"
@@ -41,7 +40,6 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="DateTime"
         android:id="@+id/preview_dateTime"
         android:layout_alignTop="@+id/preview_author"
         android:layout_alignRight="@+id/preview_title"
@@ -61,7 +59,6 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="description"
         android:textColor="#040404"
         android:id="@+id/preview_description"
         android:layout_below="@+id/preview_image"
