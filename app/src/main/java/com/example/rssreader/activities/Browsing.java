@@ -8,12 +8,14 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -37,6 +39,7 @@ public class Browsing extends AppCompatActivity {
     private ListView listView;
     private List<RssItem> rssItems;
     private BrowsingListAdapter adapter;
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,11 +51,16 @@ public class Browsing extends AppCompatActivity {
         prefHandler = new SharedPreferencesHandler(this);
         rssUrl = prefHandler.loadRssUrlFromPrefs();
         databaseHandler = new DBHandler(this);
+        initSwipeRefreshLayout();
 
         // Firstly, load database and set data to ListView
         initListView();
 
         //Secondly, trying to get new feed from url
+        tryGetNewFeed();
+    }
+
+    private void tryGetNewFeed() {
         if (isOnline()) {
             GetRssDataTask rssReadingTask = new GetRssDataTask();
             try {
@@ -66,7 +74,16 @@ public class Browsing extends AppCompatActivity {
         }
     }
 
-
+    private void initSwipeRefreshLayout() {
+        swipeRefreshLayout = (SwipeRefreshLayout)findViewById(R.id.swipe_refresh_layout);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                tryGetNewFeed();
+                swipeRefreshLayout.setRefreshing(false);
+            }
+        });
+    }
 
     @Override
     // Gets result of SettingActivity and handle reloading if URL was changed
@@ -102,17 +119,7 @@ public class Browsing extends AppCompatActivity {
     // Reloads data with data from new URL
     private boolean reloadWithNewUrl() {
         databaseHandler.deleteAll();
-        if (isOnline()) {
-            GetRssDataTask rssReadingTask = new GetRssDataTask();
-            try {
-                rssReadingTask.execute(rssUrl);
-                initListView();
-            } catch (Exception e) {
-                return false;
-            }
-        } else {
-            showToast(getString(R.string.offline_msg));
-        }
+        tryGetNewFeed();
         return true;
     }
 
@@ -145,10 +152,8 @@ public class Browsing extends AppCompatActivity {
         @Override
         protected void onPostExecute(Integer newItemsCount) {
             if (newItemsCount > 0) {
-                showToast(getString(R.string.found_items) + " " + newItemsCount.toString() + " "
-                        + getString(R.string.new_items));
+                // if new items pushed to database -> need to update ListView
                 updateListView(newItemsCount);
-                // TODO: use some marker to say 'pulltorefresh' that new items found and exec updateListView in pull to refresh handler
             }
         }
     }
@@ -159,6 +164,22 @@ public class Browsing extends AppCompatActivity {
         adapter = new BrowsingListAdapter(localActivity, rssItems);
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new ListListener(rssItems, localActivity));
+        // setting custom OnScrollListener for correct work (SwipeRefreshLayout + ListView)
+        listView.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount,
+                                 int totalItemCount) {
+                int topRowVerticalPosition =
+                        (listView == null || listView.getChildCount() == 0) ?
+                                0 : listView.getChildAt(0).getTop();
+                swipeRefreshLayout.setEnabled(firstVisibleItem == 0 && topRowVerticalPosition >= 0);
+            }
+        });
     }
 
     private void showToast(String toastText) {
