@@ -1,4 +1,4 @@
-package com.example.rssreader;
+package com.example.rssreader.utils;
 
 import android.app.Activity;
 import android.content.Context;
@@ -10,6 +10,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.rssreader.R;
 import com.example.rssreader.model.RssItem;
 
 import java.util.List;

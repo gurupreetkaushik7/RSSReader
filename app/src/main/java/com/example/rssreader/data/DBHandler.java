@@ -7,8 +7,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.example.rssreader.model.RssItem;
+import com.example.rssreader.utils.BitmapCompressor;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package com.example.rssreader.data;
+package com.example.rssreader.utils;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;

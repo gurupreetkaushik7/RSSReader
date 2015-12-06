@@ -3,7 +3,6 @@ package com.example.rssreader.activities;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -16,19 +15,17 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.AbsListView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.example.rssreader.BrowsingListAdapter;
-import com.example.rssreader.ListListener;
+import com.example.rssreader.utils.BrowsingListAdapter;
+import com.example.rssreader.utils.ListListener;
 import com.example.rssreader.R;
 import com.example.rssreader.data.DBHandler;
 import com.example.rssreader.data.SharedPreferencesHandler;
 import com.example.rssreader.model.RssItem;
 import com.example.rssreader.model.RssReader;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Browsing extends AppCompatActivity {

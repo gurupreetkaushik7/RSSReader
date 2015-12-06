@@ -1,4 +1,4 @@
-package com.example.rssreader;
+package com.example.rssreader.utils;
 
 import android.app.Activity;
 import android.content.Intent;

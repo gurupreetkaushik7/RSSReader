@@ -12,4 +12,5 @@
     <string name="preview_author">unknown author</string>
     <string name="saving_failure">Save failed</string>
     <string name="invalid_url">Invalid URL (rss-feed not found)</string>
+    <string name="at_time">at</string>
 </resources>
