@@ -4,12 +4,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
 import com.example.rssreader.R;
 
 // TODO : disable redirecting
 public class WebViewActivity extends AppCompatActivity {
-    private String link;
+    WebView webView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,11 +20,29 @@ public class WebViewActivity extends AppCompatActivity {
     }
 
     private void load() {
-        link = getIntent().getStringExtra("link");
-        WebView webView = (WebView)findViewById(R.id.webView);
-        //WebSettings webSettings = webView.getSettings();
-        //webSettings.setJavaScriptEnabled(true);
+        String link = getIntent().getStringExtra("link");
+        webView = (WebView)findViewById(R.id.webView);
+        webView.setWebViewClient(new CustomWebViewClient());
+        WebSettings webSettings = webView.getSettings();
+        webSettings.setJavaScriptEnabled(true);
         webView.loadUrl(link);
 
+    }
+
+    private class CustomWebViewClient extends WebViewClient {
+        @Override
+        public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            view.loadUrl(url);
+            return true;
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(webView.canGoBack()) {
+            webView.goBack();
+        } else {
+            super.onBackPressed();
+        }
     }
 }
