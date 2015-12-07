@@ -16,23 +16,22 @@ import java.util.List;
  * Simple ORM-like SQLite database handler
  */
 public class DBHandler extends SQLiteOpenHelper {
-    static String DATABASE_NAME = "feedDB";
-    static int DATABASE_VERSION = 1;
-    static String TABLE_FEED = "Feed";
-    static String KEY_ID = "id";
-    static String KEY_TITLE = "title";
-    static String KEY_LINK = "link";
-    static String KEY_DESCRIPTION = "description";
-    static String KEY_AUTHOR = "author";
-    static String KEY_PUB_DATE = "pubDate";
-    static String KEY_IMAGE = "image";
-    private BitmapCompressor compressor;
+    private final static String TABLE_FEED = "Feed";
+    private final static String KEY_ID = "id";
+    private final static String KEY_TITLE = "title";
+    private final static String KEY_LINK = "link";
+    private final static String KEY_DESCRIPTION = "description";
+    private final static String KEY_AUTHOR = "author";
+    private final static String KEY_PUB_DATE = "pubDate";
+    private final static String KEY_IMAGE = "image";
+    private final BitmapCompressor compressor;
 
     public DBHandler(Context context) {
-        super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        super(context, "feedDB", null, 1);
         compressor = new BitmapCompressor();
     }
 
+    // Create new SQLite database
     @Override
     public void onCreate(SQLiteDatabase db) {
         String createTable = "CREATE TABLE " + TABLE_FEED + "("
@@ -46,12 +45,14 @@ public class DBHandler extends SQLiteOpenHelper {
         db.execSQL(createTable);
     }
 
+    // Drop current db and create new
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_FEED);
         onCreate(db);
     }
 
+    // Adding new RssItem to database
     public void addRssItem(RssItem item) {
         SQLiteDatabase database = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
@@ -65,6 +66,7 @@ public class DBHandler extends SQLiteOpenHelper {
         database.close();
     }
 
+    // Get item in id row
     public RssItem getRssItem(int id) {
         SQLiteDatabase database = this.getReadableDatabase();
         Cursor cursor = database.query(
@@ -82,10 +84,13 @@ public class DBHandler extends SQLiteOpenHelper {
                     compressor.getImage(cursor.getBlob(6)));
         }
         database.close();
-        cursor.close();
+        if (cursor != null) {
+            cursor.close();
+        }
         return  item;
     }
 
+    // Get all items in database as List
     public List<RssItem> getAllRssItems() {
         SQLiteDatabase database = this.getReadableDatabase();
         String selectQuery = "SELECT  * FROM " + TABLE_FEED;
@@ -105,13 +110,15 @@ public class DBHandler extends SQLiteOpenHelper {
         return items;
     }
 
+    // Clear database (actually do same work as onUpgrade method, but easier to use because
+    // it is not override standard method)
     public void deleteAll(){
         SQLiteDatabase database = this.getWritableDatabase();
         database.execSQL("DROP TABLE " + TABLE_FEED);
-        //database.close();
         this.onCreate(database);
     }
 
+    // Get count of rows in database
     public int length() {
         String countQuery = "SELECT  * FROM " + TABLE_FEED;
         SQLiteDatabase database = this.getReadableDatabase();
@@ -122,6 +129,7 @@ public class DBHandler extends SQLiteOpenHelper {
         return length;
     }
 
+    // Get pubDate from last item
     public String getLastPubDate() {
         SQLiteDatabase database = this.getReadableDatabase();
         String selectQuery = "SELECT * FROM " + TABLE_FEED + " WHERE " + KEY_ID + " = " +

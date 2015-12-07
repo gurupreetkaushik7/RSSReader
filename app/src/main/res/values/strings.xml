@@ -1,14 +1,11 @@
 <resources>
     <string name="app_name" translatable="false">RSS Reader</string>
     <string name="action_settings">Settings</string>
-    <string name="browsing_activity_str" translatable="false">Browsing Activity</string>
     <string name="tb_rss_source">RSS source</string>
     <string name="apply_rss">Apply</string>
     <string name="rss_url_pref" translatable="false">rss</string>
-    <string name="standard_rss" translatable="false">https://sports.yahoo.com/nba/rss.xml</string>
-    <string name="found_items">Pull to show</string>
+    <string name="standard_rss" translatable="false">http://rss.nytimes.com/services/xml/rss/nyt/Space.xml</string>
     <string name="offline_msg">You are offline</string>
-    <string name="new_items">new items</string>
     <string name="preview_author">unknown author</string>
     <string name="saving_failure">Save failed</string>
     <string name="invalid_url">Invalid URL (rss-feed not found)</string>

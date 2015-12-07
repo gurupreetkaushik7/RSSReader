@@ -14,12 +14,12 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.AbsListView;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.example.rssreader.utils.BrowsingListAdapter;
-import com.example.rssreader.utils.ListListener;
+import com.example.rssreader.handlers.CustomOnScrollListener;
+import com.example.rssreader.handlers.BrowsingListAdapter;
+import com.example.rssreader.handlers.ListListener;
 import com.example.rssreader.R;
 import com.example.rssreader.data.DBHandler;
 import com.example.rssreader.data.SharedPreferencesHandler;
@@ -57,6 +57,7 @@ public class Browsing extends AppCompatActivity {
         tryGetNewFeed();
     }
 
+    // Connecting to url and getting new rss items
     private void tryGetNewFeed() {
         if (isOnline()) {
             GetRssDataTask rssReadingTask = new GetRssDataTask();
@@ -71,6 +72,7 @@ public class Browsing extends AppCompatActivity {
         }
     }
 
+    // Initialize SwipeRefreshLayout, set action to onRefresh method
     private void initSwipeRefreshLayout() {
         swipeRefreshLayout = (SwipeRefreshLayout)findViewById(R.id.swipe_refresh_layout);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -160,30 +162,20 @@ public class Browsing extends AppCompatActivity {
         adapter = new BrowsingListAdapter(localActivity, rssItems);
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new ListListener(rssItems, localActivity));
-        // setting custom OnScrollListener for correct work (SwipeRefreshLayout + ListView)
-        listView.setOnScrollListener(new AbsListView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(AbsListView view, int scrollState) {
-
-            }
-
-            @Override
-            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount,
-                                 int totalItemCount) {
-                int topRowVerticalPosition =
-                        (listView == null || listView.getChildCount() == 0) ?
-                                0 : listView.getChildAt(0).getTop();
-                swipeRefreshLayout.setEnabled(firstVisibleItem == 0 && topRowVerticalPosition >= 0);
-            }
-        });
+        // setting custom OnScrollListener
+        CustomOnScrollListener onScrollListener =
+                new CustomOnScrollListener(listView, swipeRefreshLayout);
+        listView.setOnScrollListener(onScrollListener);
     }
 
+    // Shows popup message
     private void showToast(String toastText) {
         Toast toast =  Toast.makeText(Browsing.this, toastText, Toast.LENGTH_LONG);
         toast.setGravity(Gravity.TOP, 0, 0);
         toast.show();
     }
 
+    // Push new items from database to ListView
     private void updateListView(int newItemsCount) {
         int itemsInDBCount = databaseHandler.length();
         for (int i = 1; i <= itemsInDBCount; i++) {

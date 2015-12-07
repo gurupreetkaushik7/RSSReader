@@ -1,8 +1,7 @@
-package com.example.rssreader.utils;
+package com.example.rssreader.handlers;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.net.Uri;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -17,8 +16,8 @@ import java.util.List;
  */
 public class ListListener implements OnItemClickListener
 {
-    List<RssItem> listItems;
-    Activity activity;
+    private final List<RssItem> listItems;
+    private final Activity activity;
 
     public ListListener(List<RssItem> listItems, Activity activity)
     {
@@ -26,6 +25,7 @@ public class ListListener implements OnItemClickListener
         this.activity = activity;
     }
 
+    // Starting Preview activity with extras in intent on item click
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id)
     {

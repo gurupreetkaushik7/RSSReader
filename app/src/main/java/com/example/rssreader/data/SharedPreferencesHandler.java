@@ -10,9 +10,9 @@ import com.example.rssreader.R;
  * Shared prefs handler for save and load prefs
  */
 public class SharedPreferencesHandler {
-    private Activity localActivity;
-    private String urlInPrefName;
-    private SharedPreferences preferences;
+    private final Activity localActivity;
+    private final String urlInPrefName;
+    private final SharedPreferences preferences;
 
     public SharedPreferencesHandler(Activity activity) {
         this.localActivity = activity;

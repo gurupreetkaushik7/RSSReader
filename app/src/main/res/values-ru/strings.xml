@@ -4,8 +4,6 @@
     <string name="apply_rss">Принять</string>
     <string name="tb_rss_source">Источник ленты</string>
     <string name="offline_msg">Нет подключения к сети</string>
-    <string name="found_items">Потяните вниз, чтобы показать</string>
-    <string name="new_items">новых записей</string>
     <string name="preview_author">Автор не указан</string>
     <string name="saving_failure">Ошибка при сохранении</string>
     <string name="invalid_url">Неверный URL (rss - лента не найдена)</string>
